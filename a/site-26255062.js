@@ -7,6 +7,32 @@
     els.forEach((e) => ob.observe(e));
   };
   reveal([...document.querySelectorAll('.rv')]);
+
+  // ---- a game's share link (/games/<id>/?s=<source>, studio/core/growth.gd): every store button carries the source and
+  // a phone goes straight to its own store, so tools/metrics can count installs per source (Play: utm_* in the install
+  // referrer; App Store: ct campaign) ----
+  const src = (new URLSearchParams(location.search).get('s') || '').replace(/[^\w-]/g, '').slice(0, 30);
+  // only a game's own page (the home page lists several games' buttons), and never for crawlers (a search bot with a
+  // phone user agent would be sent away from the page it came to index; independent review 2026-11-24)
+  const gamePage = document.documentElement.classList.contains('game');
+  if (src && gamePage && !/bot|crawl|spider|slurp|preview/i.test(navigator.userAgent)) {
+    for (const a of document.querySelectorAll('[data-store=android]')) {
+      const u = new URL(a.href);
+      u.searchParams.set('referrer', `utm_source=${src}&utm_medium=game&utm_campaign=${a.dataset.game || ''}`);
+      a.href = u.toString();
+    }
+    for (const a of document.querySelectorAll('[data-store=ios]')) {
+      const u = new URL(a.href);
+      if (a.dataset.pt) u.searchParams.set('pt', a.dataset.pt);
+      u.searchParams.set('ct', src);
+      u.searchParams.set('mt', '8');
+      a.href = u.toString();
+    }
+    const ua = navigator.userAgent;
+    const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const go = document.querySelector(/Android/.test(ua) ? '[data-store=android]' : ios ? '[data-store=ios]' : 'none');
+    if (go) location.replace(go.href);
+  }
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   // ---- hero parallax: pointer, device tilt, scroll and a slow idle drift ----
