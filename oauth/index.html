@@ -1,0 +1,8 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Signing in – Nuco Games</title></head>
+<body style="font:16px system-ui;background:#061214;color:#e8f4f3;display:grid;place-items:center;min-height:100vh;margin:0">
+<p id="m">Signing in…</p><script>
+(function(){var q=new URLSearchParams(location.search),s=q.get('state')||'',p=s.split('.')[0];
+if(!/^[0-9]{4,5}$/.test(p)||+p<1024||+p>65535||!(q.get('code')||q.get('error'))){document.getElementById('m').textContent='Nothing to do here.';return;}
+location.replace('http://127.0.0.1:'+p+'/callback/'+location.search);})();
+</script></body></html>
